@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AWalletVariableReturnInvestmentSchema",
+  "description": "Schema definition and compliance enforcement rules for variable-return investment data in inbox/investment/",
+  "domain": "investment",
+  "compliance_profile": "variable_return_only",
+  "disclaimer": "本データおよび分析モデルは将来の運用成果、元本、利回りを保証するものではありません。市場価格・スプレッド・ボラティリティの変動リスクを伴います。",
+  "rules": {
+    "prohibited_column_patterns": [
+      "(?i).*guarantee.*",
+      "(?i).*guaranteed.*",
+      "(?i).*fixed_yield.*",
+      "(?i).*principal_protect.*",
+      ".*保証.*",
+      ".*確定利回り.*",
+      ".*元本確保.*",
+      ".*確実.*"
+    ],
+    "action_on_prohibited_pattern": "BLOCK_AND_QUARANTINE_TO_FAILED"
+  },
+  "colony_defaults": {
+    "colony_size": 25,
+    "max_iter": 40,
+    "limit": 10,
+    "cv_folds": 5,
+    "feature_penalty": 0.002
+  },
+  "allowed_feature_prefixes": [
+    "spot_price_",
+    "volatility_",
+    "spread_",
+    "macro_",
+    "orderbook_"
+  ],
+  "feature_definitions": {
+    "spot_price_": {
+      "description": "リアルタイム・直近スポット現物・指数価格データ系列（正規化または対数リターン）",
+      "examples": [
+        "spot_price_jepx_system_tokyo",
+        "spot_price_xau_usd_gold",
+        "spot_price_xag_usd_silver",
+        "spot_price_wti_crude",
+        "spot_price_nikkei_cfd"
+      ],
+      "unit": "float (JPY, USD, or ratio)",
+      "validation": {
+        "type": "number",
+        "minimum": 0
+      }
+    },
+    "volatility_": {
+      "description": "ヒストリカルおよびインプライド・ボラティリティ指標（日次/時間次）",
+      "examples": [
+        "volatility_hist_30d_annualized",
+        "volatility_parkinson_high_low_24h",
+        "volatility_ewma_lambda_94",
+        "volatility_garman_klass"
+      ],
+      "unit": "float (annualized ratio, e.g. 0.185 = 18.5%)",
+      "validation": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 10.0
+      }
+    },
+    "spread_": {
+      "description": "市場間スプレッド・受渡スプレッド・金利スプレッド",
+      "examples": [
+        "spread_bid_ask_bps",
+        "spread_jepx_area_tokyo_kansai",
+        "spread_usdc_usdt_basis",
+        "spread_term_yield_10y_2y"
+      ],
+      "unit": "float (basis points or differential ratio)"
+    },
+    "macro_": {
+      "description": "マクロ経済指標・短期金利・政策金利・為替レート",
+      "examples": [
+        "macro_us_fed_funds_rate",
+        "macro_boj_policy_rate",
+        "macro_cpi_mom_ratio",
+        "macro_usdjpy_fx_rate"
+      ],
+      "unit": "float"
+    },
+    "orderbook_": {
+      "description": "オーダーブック板情報（流動性厚み・インバランス比率）",
+      "examples": [
+        "orderbook_depth_imbalance_top5",
+        "orderbook_weighted_mid_slippage_bps"
+      ],
+      "unit": "float"
+    }
+  },
+  "target_definition": {
+    "default_target_column": "target_variable_yield_bps",
+    "description": "翌期（または一定期間後）の変動リターン（ベーシスポイント表記または実効騰落率）",
+    "type": "regression",
+    "scoring_metric": "r2"
+  }
+}

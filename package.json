@@ -1,0 +1,45 @@
+{
+  "name": "a-wallet",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx server.ts",
+    "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "start": "node dist/server.cjs",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@1inch/fusion-sdk": "^2.4.15",
+    "@coinbase/wallet-sdk": "^4.3.7",
+    "@google/genai": "^2.24.0",
+    "@tabler/icons-react": "^3.46.0",
+    "@walletconnect/ethereum-provider": "^2.23.1",
+    "express": "^5.2.1",
+    "firebase": "^12.19.0",
+    "html5-qrcode": "^2.3.8",
+    "jsqr": "^1.4.0",
+    "lucide-react": "^0.561.0",
+    "permissionless": "^0.4.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-qr-code": "^2.0.18",
+    "recharts": "^3.10.1",
+    "viem": "^2.56.8",
+    "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "@firebase/eslint-plugin-security-rules": "^0.0.2",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.14.0",
+    "@types/ws": "^8.18.1",
+    "@vitejs/plugin-react": "^5.0.0",
+    "esbuild": "^0.28.2",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.13",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}

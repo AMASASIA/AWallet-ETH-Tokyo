@@ -1,0 +1,6 @@
+timestamp_utc,spot_price_jepx_system_tokyo,spot_price_xau_usd_gold,volatility_hist_30d_annualized,volatility_parkinson_high_low_24h,spread_bid_ask_bps,spread_usdc_usdt_basis,macro_us_fed_funds_rate,macro_boj_policy_rate,macro_usdjpy_fx_rate,orderbook_depth_imbalance_top5,target_variable_yield_bps
+2026-09-01T00:00:00Z,14.82,2495.20,0.162,0.158,2.4,0.02,5.33,0.25,148.50,0.12,18.4
+2026-09-02T00:00:00Z,15.10,2502.80,0.165,0.160,2.1,0.01,5.33,0.25,148.75,-0.05,22.1
+2026-09-03T00:00:00Z,16.45,2488.10,0.178,0.182,3.0,0.04,5.33,0.25,149.10,-0.18,9.5
+2026-09-04T00:00:00Z,13.90,2515.60,0.155,0.149,1.8,0.01,5.33,0.25,147.90,0.22,28.7
+2026-09-05T00:00:00Z,14.25,2510.40,0.158,0.152,2.0,0.02,5.33,0.25,148.20,0.08,19.2

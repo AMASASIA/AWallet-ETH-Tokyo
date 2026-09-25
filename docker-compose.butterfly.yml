@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  # 1. 既存ローカルLLM (Ollama) - 外部ポート非公開 (127.0.0.1 のみ、または内部ブリッジのみ)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tive-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - internal_net
+    # ports をホスト 0.0.0.0 にマップしないことで外部から直接アクセス遮断
+    expose:
+      - "11434"
+
+  # 2. 新規 Butterfly Effect ラベリング/AutoML API (FastAPI)
+  # AWallet CDKとは完全別アカウント・別デプロイ
+  butterfly-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.butterfly
+    container_name: tive-butterfly-api
+    restart: unless-stopped
+    environment:
+      - PORT=8090
+      - AUDIT_LOG_PATH=/var/log/butterfly_audit.log
+      - ALLOWED_PROJECT_KEYS=netsuite_sec_key,anthem_sec_key,aimap_sec_key
+      - AWALLET_PAYMENT_BACKEND_URL=https://awallet-payment-backend.internal
+    volumes:
+      - ./logs:/var/log
+      - ./models:/app/models
+    networks:
+      - internal_net
+      - tunnel_net
+    expose:
+      - "8090"
+
+  # 3. Cloudflare Tunnel (cloudflared)
+  # Ollamaのポート(11434)は塞いだまま、butterfly-api:8090 のみ外部へ安全にトンネリング公開
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: tive-tunnel
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - tunnel_net
+    depends_on:
+      - butterfly-api
+
+networks:
+  # Ollamaとbutterfly-apiは同一ホスト内内部通信用（外部非公開）
+  internal_net:
+    internal: true
+  # Cloudflare Tunnelがbutterfly-apiのみ外向きに中継するためのネットワーク
+  tunnel_net:
+
+volumes:
+  ollama_data:

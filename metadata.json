@@ -1,0 +1,10 @@
+{
+  "name": "Remix AWallet",
+  "description": "Identity-native wallet OS integrating DID, ERC-4337, Multisig, and Soulbound Tokens.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
