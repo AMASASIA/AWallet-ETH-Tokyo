@@ -1,6 +1,12 @@
 import { Router } from 'express';
 import crypto from 'crypto';
 import { AgentAccount, A2ATransaction, AiWorkerMarketTask } from '../types.ts';
+import {
+  BASE_SEPOLIA_USDC_ADDRESS,
+  AMANE_A2A_ESCROW_CONTRACT,
+  executeA2AOnChainEscrow,
+  getOnChainAgentUsdcBalance,
+} from './a2aEscrowContract.ts';
 
 export const a2aRouter = Router();
 
@@ -168,8 +174,8 @@ a2aRouter.get('/agent-account', (req, res) => {
   });
 });
 
-// 2. Execute Task to Earn Crypto (Worker API - HTTP 402 Protocol)
-a2aRouter.post('/execute-task', (req, res) => {
+// 2. Execute Task to Earn Crypto (Worker API - HTTP 402 Protocol & Escrow Fulfillment)
+a2aRouter.post('/execute-task', async (req, res) => {
   try {
     const { taskId, customClient } = req.body;
     const task = marketTasks.find((t) => t.id === taskId);
@@ -177,16 +183,16 @@ a2aRouter.post('/execute-task', (req, res) => {
       return res.status(404).json({ success: false, error: 'Task not found' });
     }
 
-    // Simulate Work Output
-    const outputs = [
-      'Task executed with 100% deterministic precision. Proof-of-Work hash generated.',
-      'Base L2 micro-transaction verified. Output artifact dispatched via x402 header.',
-      'Analysis completed. Validated under Tive ◉AI Policy Engine constraints.',
-    ];
-    const snippet = outputs[Math.floor(Math.random() * outputs.length)];
+    // Execute through A2A Escrow Smart Contract on Base Sepolia
+    const escrowResult = await executeA2AOnChainEscrow({
+      payerAgent: customClient?.address || '0x412d26f25413346d871780447aC5389659b9892e',
+      payeeAgent: agentAccountState.subAddress,
+      taskId: task.id,
+      amountUsdc: task.rewardUsdc,
+      taskTitle: task.title,
+    });
 
     const reward = task.rewardUsdc;
-    const txHash = '0x' + crypto.randomBytes(32).toString('hex');
     const newTx: A2ATransaction = {
       id: `a2a-tx-${Date.now().toString().slice(-6)}`,
       type: 'EARN_REVENUE',
@@ -204,13 +210,13 @@ a2aRouter.post('/execute-task', (req, res) => {
       },
       taskType: task.taskType,
       taskTitle: task.title,
-      taskOutputSnippet: snippet,
+      taskOutputSnippet: `Base L2 Escrow (${escrowResult.escrowId}) 解除完了。USDCスマートコントラクト決済が確定しました。`,
       amountUsdc: reward,
       status: 'settled',
       protocol: 'HTTP_402_A2A',
-      txHash,
+      txHash: escrowResult.txHash,
       timestamp: 'たった今',
-      blockNumber: 22482000 + Math.floor(Math.random() * 500),
+      blockNumber: escrowResult.blockNumber,
       feeUsdc: 0.0006,
     };
 
@@ -221,9 +227,10 @@ a2aRouter.post('/execute-task', (req, res) => {
 
     res.json({
       success: true,
-      message: `タスク完了！ AI口座へ ${reward} USDC が着金しました。`,
+      message: `タスク完了！ Base Sepoliaスマートコントラクト経由で AI口座へ +${reward} USDC が着金しました。`,
       transaction: newTx,
       updatedAccount: agentAccountState,
+      escrow: escrowResult,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -231,8 +238,8 @@ a2aRouter.post('/execute-task', (req, res) => {
   }
 });
 
-// 3. AI-to-AI Payment (A2A Autonomous Outbound Transfer)
-a2aRouter.post('/pay-agent', (req, res) => {
+// 3. AI-to-AI Payment (A2A Autonomous Outbound Transfer with On-chain Escrow)
+a2aRouter.post('/pay-agent', async (req, res) => {
   try {
     const { targetAgentName, targetAgentDid, targetAddress, taskType, taskTitle, amountUsdc } = req.body;
 
@@ -264,7 +271,16 @@ a2aRouter.post('/pay-agent', (req, res) => {
       });
     }
 
-    const txHash = '0x' + crypto.randomBytes(32).toString('hex');
+    // Lock and dispatch via Amane A2A Escrow Smart Contract on Base Sepolia
+    const payee = targetAddress || '0x' + crypto.randomBytes(20).toString('hex');
+    const escrowResult = await executeA2AOnChainEscrow({
+      payerAgent: agentAccountState.subAddress,
+      payeeAgent: payee,
+      taskId: `task-out-${Date.now()}`,
+      amountUsdc: amount,
+      taskTitle: taskTitle || 'A2A Autonomous Task',
+    });
+
     const newTx: A2ATransaction = {
       id: `a2a-tx-${Date.now().toString().slice(-6)}`,
       type: 'A2A_PAY_OUT',
@@ -276,19 +292,19 @@ a2aRouter.post('/pay-agent', (req, res) => {
       },
       toEntity: {
         name: targetAgentName || 'External Autonomous Agent',
-        did: targetAgentDid || 'did:agent:external:8453:0x...' ,
-        address: targetAddress || '0x' + crypto.randomBytes(20).toString('hex'),
+        did: targetAgentDid || 'did:agent:external:8453:0x...',
+        address: payee,
         isAiAgent: true,
       },
       taskType: taskType || 'DATA_ORCHESTRATION',
       taskTitle: taskTitle || 'A2A Autonomous Compute / Data Task',
-      taskOutputSnippet: 'HTTP 402 Payment settled on Base L2. Remote agent delivered response payload.',
+      taskOutputSnippet: `Base Sepolia スマートコントラクト (${AMANE_A2A_ESCROW_CONTRACT}) 上でエスクロー即時約定。`,
       amountUsdc: amount,
       status: 'settled',
       protocol: 'HTTP_402_A2A',
-      txHash,
+      txHash: escrowResult.txHash,
       timestamp: 'たった今',
-      blockNumber: 22482100 + Math.floor(Math.random() * 200),
+      blockNumber: escrowResult.blockNumber,
       feeUsdc: 0.0005,
     };
 
@@ -300,9 +316,10 @@ a2aRouter.post('/pay-agent', (req, res) => {
 
     res.json({
       success: true,
-      message: `A2A決済成功！ 外部AI (${targetAgentName}) へ ${amount} USDC を支払いました。`,
+      message: `A2Aオンチェーン決済成功！ Base Sepoliaエスクロー経由で 外部AI (${targetAgentName}) へ ${amount} USDC を支払いました。`,
       transaction: newTx,
       updatedAccount: agentAccountState,
+      escrow: escrowResult,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);

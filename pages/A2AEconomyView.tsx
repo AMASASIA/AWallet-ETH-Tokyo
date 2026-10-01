@@ -272,6 +272,18 @@ export const A2AEconomyView: React.FC<A2AEconomyViewProps> = ({
               <div className="font-mono text-[10px] text-zinc-400 truncate">
                 Sub-Address: <span className="text-emerald-400">{account?.subAddress}</span>
               </div>
+              <div className="pt-0.5 flex items-center justify-between text-[9px] font-mono text-zinc-500">
+                <span>Contract: Base Sepolia Escrow</span>
+                <a
+                  href={`https://sepolia.basescan.org/address/0x8453A2A01492dCe883f3ed872659dc01ab8872f0`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-emerald-400 hover:underline flex items-center gap-0.5"
+                >
+                  <span>0x8453...72f0</span>
+                  <ExternalLink size={9} />
+                </a>
+              </div>
             </div>
           </div>
 

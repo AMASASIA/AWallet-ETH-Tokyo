@@ -9,6 +9,7 @@ import { webauthnRouter } from './server/webauthnProxy.ts';
 import { a2aRouter } from './server/a2aRouter.ts';
 import { tiveRouter } from './server/tiveRouter.ts';
 import { anchorSettingsRouter } from './server/anchorSettingsProxy.ts';
+import { invisibleRouter } from './server/invisibleRouter.ts';
 import { verifyRouter } from './server/verifyProxy.ts';
 import { tapRouter } from './server/tapProxy.ts';
 import { x402Router } from './server/x402Proxy.ts';
@@ -76,6 +77,9 @@ async function startServer() {
 
   // 0DAO On-chain Verification Proxy
   app.use('/api/verify', verifyRouter);
+
+  // Invisible Finance (ERC-4337 v0.7 Session Key + Paymaster + Uniswap v4 Hook)
+  app.use('/api/invisible', invisibleRouter);
 
   // Pico W Hardware Tap Switch Receiver & Poller
   app.use('/api/tap', tapRouter);
