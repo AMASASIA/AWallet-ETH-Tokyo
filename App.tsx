@@ -14,6 +14,8 @@ import { TiveDashboard } from './pages/TiveDashboard';
 import { TiveOpenWebUIView } from './pages/TiveOpenWebUIView';
 import { A2AEconomyView } from './pages/A2AEconomyView';
 import { ProposalQrScannerModal } from './components/ProposalQrScannerModal';
+import { SnapshotManagerModal } from './components/SnapshotManagerModal';
+import { AppSnapshot } from './services/snapshotService';
 import { INITIAL_POLICY_CONFIG, evaluateTransactionPolicy } from './services/sessionPolicyEngine';
 import { 
   INITIAL_USER, 
@@ -96,6 +98,7 @@ export const App: React.FC = () => {
   const [isTiveDashboardOpen, setIsTiveDashboardOpen] = useState(false);
   const [isA2AEconomyOpen, setIsA2AEconomyOpen] = useState(false);
   const [isProposalScannerOpen, setIsProposalScannerOpen] = useState(false);
+  const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState(false);
 
   // Invisible Finance State (tive-ai & Pico W BLE)
   const [invisibleActions, setInvisibleActions] = useState<InvisibleAction[]>(INITIAL_INVISIBLE_ACTIONS);
@@ -240,6 +243,15 @@ export const App: React.FC = () => {
       return t;
     }));
     handleLogActivity('Testnet Faucet: Claimed +0.5 Sepolia ETH & +100 USDC', 'Mint');
+  };
+
+  const handleRestoreSnapshot = (snapshot: AppSnapshot) => {
+    if (snapshot.user) setUser(snapshot.user);
+    if (snapshot.tokens) setTokens(snapshot.tokens);
+    if (snapshot.nfts) setNfts(snapshot.nfts);
+    if (snapshot.invisibleActions) setInvisibleActions(snapshot.invisibleActions);
+    if (snapshot.policyConfig) setPolicyConfig(snapshot.policyConfig);
+    handleLogActivity(`State Restored from snapshot: "${snapshot.name}"`, 'Policy');
   };
 
   // 1. Send Action (Enforced with Client & Server Policy Engine)
@@ -907,6 +919,7 @@ export const App: React.FC = () => {
                     setIsPolicyEngineOpen(false);
                   }}
                   onOpenAqua={() => setIsAquaModalOpen(true)}
+                  onOpenSnapshotManager={() => setIsSnapshotModalOpen(true)}
                 />
               )
             )}
@@ -983,6 +996,19 @@ export const App: React.FC = () => {
           }));
           handleLogActivity(`1inch Aqua Sweep: Swept ${count} small balances into +${totalUsdc.toFixed(2)} USDC`, 'Swap');
         }}
+      />
+
+      {/* State Anchoring & 1-Click Restore Modal */}
+      <SnapshotManagerModal
+        isOpen={isSnapshotModalOpen}
+        onClose={() => setIsSnapshotModalOpen(false)}
+        currentUser={user}
+        currentTokens={tokens}
+        currentNfts={nfts}
+        currentInvisibleActions={invisibleActions}
+        currentPolicyConfig={policyConfig}
+        currentNetwork={selectedChain.name}
+        onRestoreSnapshot={handleRestoreSnapshot}
       />
     </div>
   );

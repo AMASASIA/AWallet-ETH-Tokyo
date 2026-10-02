@@ -13,7 +13,8 @@ import {
   Globe,
   Cpu,
   Wifi,
-  Bluetooth
+  Bluetooth,
+  Archive
 } from 'lucide-react';
 import { User, SBT, Proposal, PolicyEngineConfig } from '../types';
 import { formatAddress } from '../services/mockChain';
@@ -36,6 +37,7 @@ interface MoreViewProps {
   onOpenTiveDashboard?: () => void;
   onOpenA2AEconomy?: () => void;
   onOpenAqua?: () => void;
+  onOpenSnapshotManager?: () => void;
 }
 
 export const MoreView: React.FC<MoreViewProps> = ({
@@ -54,6 +56,7 @@ export const MoreView: React.FC<MoreViewProps> = ({
   onOpenTiveDashboard,
   onOpenA2AEconomy,
   onOpenAqua,
+  onOpenSnapshotManager,
 }) => {
   const [currentSubView, setCurrentSubView] = useState<'identity' | 'governance' | 'bundler_verify' | null>(null);
   const [showInteroperabilityGuide, setShowInteroperabilityGuide] = useState(false);
@@ -61,6 +64,7 @@ export const MoreView: React.FC<MoreViewProps> = ({
   const [guideTab, setGuideTab] = useState<GuideTab>('comparison');
   const [copiedAddr, setCopiedAddr] = useState(false);
   const [copiedDid, setCopiedDid] = useState(false);
+  const [copiedAether, setCopiedAether] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
 
   // 0DAO Verification & Bundler State
@@ -123,11 +127,14 @@ export const MoreView: React.FC<MoreViewProps> = ({
     }
   };
 
-  const handleCopy = (text: string, type: 'addr' | 'did') => {
+  const handleCopy = (text: string, type: 'addr' | 'did' | 'aether') => {
     navigator.clipboard.writeText(text);
     if (type === 'addr') {
       setCopiedAddr(true);
       setTimeout(() => setCopiedAddr(false), 2000);
+    } else if (type === 'aether') {
+      setCopiedAether(true);
+      setTimeout(() => setCopiedAether(false), 2000);
     } else {
       setCopiedDid(true);
       setTimeout(() => setCopiedDid(false), 2000);
@@ -154,64 +161,131 @@ export const MoreView: React.FC<MoreViewProps> = ({
           >
             <ArrowLeft size={20} />
           </button>
-          <span className="font-semibold text-sm">Soul Identity (DID)</span>
+          <span className="font-semibold text-sm">Identity &amp; Sovereign DIDs</span>
           <div className="w-6" />
         </div>
 
-        {/* User Card */}
-        <div className="p-5 rounded-2xl bg-zinc-950 border border-zinc-900 space-y-4">
-          <div className="flex items-center space-x-3.5">
-            <img
-              src={user.avatar}
-              alt="Avatar"
-              className="w-12 h-12 rounded-full grayscale border border-zinc-800"
-            />
-            <div>
-              <h3 className="font-bold text-base text-white">{user.name}</h3>
-              <p className="text-xs text-zinc-500 font-mono">{user.baseName || 'alex.base.eth'}</p>
+        {/* Identity Architecture Card */}
+        <div className="p-4 rounded-2xl bg-gradient-to-b from-zinc-900/80 to-zinc-950 border border-zinc-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-white tracking-wide uppercase flex items-center space-x-1.5">
+              <span>DID Architecture</span>
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">
+              Anchor &amp; Aether
+            </span>
+          </div>
+
+          <p className="text-xs text-zinc-400 leading-relaxed bg-black/40 border border-zinc-800/80 p-3 rounded-xl">
+            <strong className="text-blue-400">Anchor ID</strong> is the primary W3C Root DID controlling credentials, SBTs, and master authorization.<br />
+            <strong className="text-purple-400">Aether ID</strong> is the dedicated autonomous Agent DID for Tive ◉AI to execute tasks and handle sub-accounts.
+          </p>
+
+          {/* 1. Anchor ID (Root Master) */}
+          <div className="p-3.5 rounded-xl bg-blue-950/20 border border-blue-900/50 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-300 text-xs font-bold">
+                  A
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-white flex items-center space-x-1.5">
+                    <span>Anchor ID</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-900/60 text-blue-200 border border-blue-700">
+                      Root DID (W3C)
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-zinc-400 font-mono">{user.name} ({user.baseName || 'alex.base.eth'})</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1.5 pt-1 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500 text-[11px]">Anchor DID (W3C)</span>
+                <button
+                  onClick={() => handleCopy(user.anchorDid || user.did, 'did')}
+                  className="flex items-center space-x-1 font-mono text-blue-300 hover:text-white"
+                >
+                  <span>{(user.anchorDid || user.did).slice(0, 18)}...</span>
+                  {copiedDid ? <Check size={12} /> : <Copy size={12} />}
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500 text-[11px]">Address</span>
+                <button
+                  onClick={() => handleCopy(user.address, 'addr')}
+                  className="flex items-center space-x-1 font-mono text-zinc-300 hover:text-white"
+                >
+                  <span>{formatAddress(user.address)}</span>
+                  {copiedAddr ? <Check size={12} /> : <Copy size={12} />}
+                </button>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-2 pt-2 border-t border-zinc-900">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-zinc-500">DID Identifier</span>
-              <button
-                onClick={() => handleCopy(user.did, 'did')}
-                className="flex items-center space-x-1 font-mono text-zinc-300 hover:text-white"
-              >
-                <span>{user.did.slice(0, 16)}...</span>
-                {copiedDid ? <Check size={12} /> : <Copy size={12} />}
-              </button>
+          {/* 2. Aether ID (Agent DID) */}
+          <div className="p-3.5 rounded-xl bg-purple-950/20 border border-purple-900/50 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 text-xs font-bold leading-none">
+                  ◉
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-white flex items-center space-x-1.5">
+                    <span>Aether ID</span>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-purple-900/60 text-purple-200 border border-purple-700">
+                      Agent DID (Sub-Account)
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-zinc-400 font-mono">Tive ◉AI Worker #01 / A2A Sub-Account</p>
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-zinc-500">Controller Address</span>
-              <button
-                onClick={() => handleCopy(user.address, 'addr')}
-                className="flex items-center space-x-1 font-mono text-zinc-300 hover:text-white"
-              >
-                <span>{formatAddress(user.address)}</span>
-                {copiedAddr ? <Check size={12} /> : <Copy size={12} />}
-              </button>
+            <div className="space-y-1.5 pt-1 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500 text-[11px]">Aether DID</span>
+                <button
+                  onClick={() => handleCopy(user.aetherDid || 'did:aether:tive:8453:0x892a78BFe912A346C898302A04bB5C2d38eA6091', 'aether')}
+                  className="flex items-center space-x-1 font-mono text-purple-300 hover:text-white"
+                >
+                  <span>{(user.aetherDid || 'did:aether:tive:8453:0x892a78BFe912A346C898302A04bB5C2d38eA6091').slice(0, 22)}...</span>
+                  {copiedAether ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                </button>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500 text-[11px]">Parent Anchor</span>
+                <span className="font-mono text-zinc-400 text-[11px]">
+                  {(user.anchorDid || user.did).slice(0, 14)}... (Verified)
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-500 text-[11px]">Sub-Account Address</span>
+                <span className="font-mono text-emerald-400 text-[11px]">0x892a...6091</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Register New DID */}
+        {/* Rotate / Register Master Anchor DID */}
         <button
           onClick={handleRegister}
           disabled={isRegistering}
           className="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 border border-zinc-800 transition-colors"
         >
           <Plus size={14} />
-          <span>{isRegistering ? 'Generating ION Key...' : 'Rotate / Register DID'}</span>
+          <span>{isRegistering ? 'Generating ION Key...' : 'Rotate / Register Anchor ID'}</span>
         </button>
 
-        {/* Soulbound Credentials List */}
+        {/* Soulbound Credentials List (Bound to Anchor ID) */}
         <div>
-          <h4 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3">
-            Soulbound Credentials ({sbts.length})
-          </h4>
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+              Anchor ID Soulbound Credentials ({sbts.length})
+            </h4>
+            <span className="text-[10px] text-zinc-500 font-mono">Anchor Verified</span>
+          </div>
           <div className="divide-y divide-zinc-900 border-y border-zinc-900">
             {sbts.map((sbt) => (
               <div key={sbt.id} className="py-3 px-1 flex items-center justify-between">
@@ -644,7 +718,7 @@ export const MoreView: React.FC<MoreViewProps> = ({
                 <div className="flex items-center space-x-2">
                   <p className="text-sm font-medium text-white">A2A Economy &amp; AI Account</p>
                   <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">
-                    AI専用口座
+                    Agent Sub-Account
                   </span>
                 </div>
                 <p className="text-xs text-zinc-500">
@@ -670,11 +744,37 @@ export const MoreView: React.FC<MoreViewProps> = ({
                 <div className="flex items-center space-x-2">
                   <p className="text-sm font-medium text-white">1inch Aqua App</p>
                   <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800">
-                    18 coins · 残高集約
+                    18 coins · Sweep
                   </span>
                 </div>
                 <p className="text-xs text-zinc-500">
                   Small balances sweep · Zero gas settlement via Resolvers
+                </p>
+              </div>
+            </div>
+            <ChevronRight size={18} className="text-zinc-600 group-hover:text-zinc-300 transition-colors" />
+          </button>
+        )}
+
+        {/* State Anchoring & Complete Recovery (Snapshots) */}
+        {onOpenSnapshotManager && (
+          <button
+            onClick={onOpenSnapshotManager}
+            className="w-full flex items-center justify-between py-4 px-1 text-left hover:bg-zinc-950/60 transition-colors group cursor-pointer"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 flex items-center justify-center text-[10px] font-bold select-none shadow">
+                <Archive size={11} />
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <p className="text-sm font-medium text-white">State Anchoring &amp; Full Restore</p>
+                  <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">
+                    Snapshot
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-500">
+                  Preserve &amp; restore wallet state, balances, and UI configs in 1 click
                 </p>
               </div>
             </div>
@@ -721,11 +821,11 @@ export const MoreView: React.FC<MoreViewProps> = ({
                 <p className="text-sm font-medium text-white">Policy Engine &amp; Spending Caps</p>
                 {policyConfig.circuitBreakerStatus === 'TRIPPED' ? (
                   <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-rose-500 text-white font-bold">
-                    停止中
+                    TRIPPED
                   </span>
                 ) : (
                   <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-900 text-zinc-400">
-                    安全保護
+                    PROTECTED
                   </span>
                 )}
               </div>
@@ -737,7 +837,7 @@ export const MoreView: React.FC<MoreViewProps> = ({
           <ChevronRight size={18} className="text-zinc-600" />
         </button>
 
-        {/* Identity & DID */}
+        {/* Identity & DID: Anchor ID & Aether ID */}
         <button
           onClick={() => setCurrentSubView('identity')}
           className="w-full flex items-center justify-between py-4 px-1 text-left hover:bg-zinc-950/60 transition-colors cursor-pointer"
@@ -745,8 +845,16 @@ export const MoreView: React.FC<MoreViewProps> = ({
           <div className="flex items-center space-x-3">
             <Fingerprint size={18} className="text-zinc-400" />
             <div>
-              <p className="text-sm font-medium text-white">Soul Identity &amp; DID</p>
-              <p className="text-xs text-zinc-500">Decentralized IDs &amp; Soulbound credentials</p>
+              <div className="flex items-center space-x-2">
+                <p className="text-sm font-medium text-white">Anchor ID &amp; Aether ID</p>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-blue-950 text-blue-300 border border-blue-800">
+                  Anchor
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-purple-950 text-purple-300 border border-purple-800">
+                  Aether
+                </span>
+              </div>
+              <p className="text-xs text-zinc-500">Anchor ID (W3C Root DID) &amp; Aether ID (Agent DID)</p>
             </div>
           </div>
           <ChevronRight size={18} className="text-zinc-600" />

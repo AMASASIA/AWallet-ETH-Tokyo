@@ -50,6 +50,21 @@ service cloud.firestore {
         allow update: if isOwner(userId);
         allow delete: if isOwner(userId);
       }
+
+      // Subcollection: UI/UX & State Backups (Snapshots for 1-click restore & anchoring)
+      match /snapshots/{snapshotId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(snapshotId);
+        allow update: if isOwner(userId);
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // AWallet Balances & Art Credits (Server-Only Writes, Read restricted to Owner UID)
+    match /awalletBalances/{userId} {
+      // Clients can only read their own balance; write is strictly denied (Backend Service Account only)
+      allow read: if isOwner(userId);
+      allow write: if false;
     }
   }
 }

@@ -132,7 +132,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <button
             onClick={() => setShowDidModal(true)}
             className="px-3 py-1.5 rounded-full bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white flex items-center space-x-2 transition-all active:scale-95 group shadow-sm cursor-pointer"
-            title="Soul Identity (DID)"
+            title="Anchor ID (Human Master DID) & Aether ID (AI)"
           >
             <div className="w-5 h-5 rounded-full bg-zinc-900 group-hover:bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
               <Fingerprint size={12} />
@@ -410,11 +410,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <div className="w-full max-w-sm rounded-3xl bg-zinc-950 border border-zinc-800 p-5 space-y-4 shadow-2xl relative">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white">
+                <div className="w-9 h-9 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
                   <Fingerprint size={18} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Soul Identity (DID)</h3>
+                  <div className="flex items-center space-x-1.5">
+                    <h3 className="text-sm font-semibold text-white">Anchor ID</h3>
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-blue-950 text-blue-300 border border-blue-800">
+                      Root DID
+                    </span>
+                  </div>
                   <p className="text-[11px] text-zinc-500 font-mono">{baseName || 'alex.base.eth'}</p>
                 </div>
               </div>
@@ -426,9 +431,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </button>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-zinc-900/70 border border-zinc-800/80 space-y-2.5">
+            {/* Anchor ID */}
+            <div className="p-3.5 rounded-2xl bg-blue-950/20 border border-blue-900/50 space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-zinc-500">DID Identifier</span>
+                <span className="text-blue-300 font-medium">Anchor ID (W3C DID)</span>
                 <button
                   onClick={handleCopyDid}
                   className="flex items-center space-x-1 font-mono text-zinc-300 hover:text-white transition-colors cursor-pointer"
@@ -441,13 +447,27 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   ) : (
                     <>
                       <Copy size={12} />
-                      <span className="text-[11px]">Copy DID</span>
+                      <span className="text-[11px]">Copy</span>
                     </>
                   )}
                 </button>
               </div>
-              <p className="text-xs font-mono text-white break-all bg-black/40 p-2.5 rounded-xl border border-zinc-800">
+              <p className="text-xs font-mono text-white break-all bg-black/50 p-2.5 rounded-xl border border-zinc-800">
                 {userDid}
+              </p>
+            </div>
+
+            {/* Aether ID */}
+            <div className="p-3 rounded-2xl bg-purple-950/20 border border-purple-900/40 space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-purple-300 font-medium flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                  Aether ID (Agent DID)
+                </span>
+                <span className="text-[10px] text-zinc-400 font-mono">Verified</span>
+              </div>
+              <p className="text-[11px] font-mono text-zinc-300 truncate bg-black/40 px-2 py-1.5 rounded-lg border border-purple-950">
+                did:aether:tive:8453:0x892a...6091
               </p>
             </div>
 
@@ -476,7 +496,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   }}
                   className="flex-1 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors shadow cursor-pointer"
                 >
-                  <span>SBT Details</span>
+                  <span>Anchor &amp; Aether Details</span>
                   <ExternalLink size={12} />
                 </button>
               )}

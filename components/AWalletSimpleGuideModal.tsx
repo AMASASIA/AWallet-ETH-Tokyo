@@ -39,7 +39,7 @@ export const AWalletSimpleGuideModal: React.FC<AWalletSimpleGuideModalProps> = (
   onDeploySampleAction,
 }) => {
   const [activeTab, setActiveTab] = useState<GuideTab>(initialTab);
-  const [lang, setLang] = useState<'ja' | 'en'>('ja');
+  const [lang, setLang] = useState<'ja' | 'en'>('en');
   const isJa = lang === 'ja';
 
   // Interactive 4-Step Simulator State

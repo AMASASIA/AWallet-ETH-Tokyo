@@ -15,7 +15,9 @@ export interface Token {
 
 export interface User {
   address: string;
-  did: string;
+  did: string;           // Primary Anchor ID (did:ion:... or did:key:...)
+  anchorDid?: string;    // Anchor ID (Root Identity)
+  aetherDid?: string;    // Aether ID (Tive AI Agent DID)
   name: string;
   avatar: string;
   network?: string;

@@ -1,10 +1,12 @@
 import { InvisibleAction, InvisibleTier, NFTItem, Proposal, SBT, Token, User } from '../types';
 
-// Initial User on Base
+// Initial User on Base (Anchor ID & Aether ID)
 export const INITIAL_USER: User = {
   address: '0x8453B47c0a9B5B2E8102dCe883f3eD872659dC01',
   baseName: 'alex.base.eth',
-  did: 'did:key:z6Mkq4G...base99',
+  did: 'did:ion:EiD...AnchorHuman99',
+  anchorDid: 'did:ion:EiD...AnchorHuman99',
+  aetherDid: 'did:aether:tive:8453:0x892a78BFe912A346C898302A04bB5C2d38eA6091',
   name: 'Alex Rivera',
   avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
   network: 'Base Mainnet',

@@ -35,7 +35,7 @@ interface A2AEconomyViewProps {
 export const A2AEconomyView: React.FC<A2AEconomyViewProps> = ({
   user,
   onBack,
-  lang = 'ja',
+  lang = 'en',
   onLogActivity,
 }) => {
   const isJa = lang === 'ja';
@@ -232,42 +232,46 @@ export const A2AEconomyView: React.FC<A2AEconomyViewProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-            {/* Level 1: Anchor Account (DID) */}
-            <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800 space-y-1.5">
+            {/* Level 1: Anchor ID (Root DID) */}
+            <div className="p-3 rounded-xl bg-zinc-950/80 border border-blue-900/60 space-y-1.5">
               <div className="flex items-center space-x-2">
                 <div className="w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
                   <UserIcon size={12} />
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-white">
-                    {isJa ? 'Anchor アカウント (DID)' : 'Anchor Account (DID)'}
+                  <div className="text-xs font-semibold text-white flex items-center space-x-1">
+                    <span>Anchor ID (Root DID)</span>
                   </div>
                   <div className="text-[10px] text-zinc-400">
-                    {isJa ? 'SBT身元保証 / ルート管理' : 'SBT Identity Verified / Root Control'}
+                    {isJa ? 'SBT身元保証 / ルート管理' : 'SBT Identity Verified / Master Control'}
                   </div>
                 </div>
               </div>
               <div className="pt-1 font-mono text-[10px] text-zinc-400 truncate">
-                DID: <span className="text-zinc-200">{user.did}</span>
+                Anchor DID: <span className="text-blue-300">{user.anchorDid || user.did}</span>
               </div>
               <div className="font-mono text-[10px] text-zinc-400 truncate">
-                Address: <span className="text-blue-300">{user.address}</span>
+                Address: <span className="text-zinc-200">{user.address}</span>
               </div>
             </div>
 
-            {/* Level 2: AI Agent Sub-Account */}
-            <div className="p-3 rounded-xl bg-zinc-950/80 border border-emerald-900/60 space-y-1.5">
+            {/* Level 2: Aether ID (Agent Sub-Account) */}
+            <div className="p-3 rounded-xl bg-zinc-950/80 border border-purple-900/60 space-y-1.5">
               <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                <div className="w-6 h-6 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400">
                   <Cpu size={12} />
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-emerald-300">AI自律口座 (Sub-Account)</div>
-                  <div className="text-[10px] text-zinc-400">Tive ◉AI Worker #01 / Session Key</div>
+                  <div className="text-xs font-semibold text-purple-300 flex items-center space-x-1">
+                    <span>Aether ID (Agent DID)</span>
+                  </div>
+                  <div className="text-[10px] text-zinc-400">
+                    {isJa ? 'オンチェーン自律口座 (Sub-Account)' : 'On-Chain Dedicated Sub-Account'}
+                  </div>
                 </div>
               </div>
               <div className="pt-1 font-mono text-[10px] text-zinc-400 truncate">
-                Agent DID: <span className="text-zinc-200">{account?.agentDid}</span>
+                Aether DID: <span className="text-purple-300">{account?.agentDid || user.aetherDid || 'did:aether:tive:8453:0x892a...6091'}</span>
               </div>
               <div className="font-mono text-[10px] text-zinc-400 truncate">
                 Sub-Address: <span className="text-emerald-400">{account?.subAddress}</span>
@@ -290,13 +294,13 @@ export const A2AEconomyView: React.FC<A2AEconomyViewProps> = ({
           <div className="text-[11px] text-zinc-400 leading-relaxed border-t border-zinc-900 pt-2.5">
             {isJa ? (
               <>
-                <strong className="text-zinc-200">Anchor ID (DID/SBT)</strong> の傘下に、AIが専用の
-                <strong className="text-emerald-400"> オンチェーン独立口座 (Sub-Account)</strong> を保持。
-                外部タスクで暗号資産を自律的に稼ぎ、Policy Engineの枠内でAI同士（A2A）で決済します。
+                <strong className="text-blue-300">Anchor ID (Root DID / SBT)</strong> と連携し、AI専用の
+                <strong className="text-purple-300"> Aether ID (Agent DID / Sub-Account)</strong> が稼働します。
+                AIはAether IDを通じてタスクを遂行し暗号資産を自律受領し、いつでも親のAnchor口座へ還元できます。
               </>
             ) : (
               <>
-                Under the Anchor ID, the AI maintains a dedicated on-chain Sub-Account to autonomously earn and pay crypto via A2A protocols.
+                Linked with the root <strong className="text-blue-300">Anchor ID</strong>, the dedicated <strong className="text-purple-300">Aether ID</strong> autonomously earns and settles crypto within Policy Engine caps.
               </>
             )}
           </div>
