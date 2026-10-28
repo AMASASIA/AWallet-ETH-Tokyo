@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AetherIdEmbed } from '../components/AetherIdEmbed';
 import { 
   Fingerprint, 
   Users, 
@@ -267,6 +268,8 @@ export const MoreView: React.FC<MoreViewProps> = ({
             </div>
           </div>
         </div>
+
+        <AetherIdEmbed />
 
         {/* Rotate / Register Master Anchor DID */}
         <button
